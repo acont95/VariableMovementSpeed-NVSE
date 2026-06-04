@@ -4,6 +4,3 @@
 [submodule "external/CommonLibFNV"]
 	path = external/CommonLibFNV
 	url = https://github.com/acont95/CommonLibFNV
-[submodule "external/simpleini"]
-	path = external/simpleini
-	url = https://github.com/brofield/simpleini.git
