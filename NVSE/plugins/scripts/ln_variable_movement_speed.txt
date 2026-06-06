@@ -1,0 +1,221 @@
+int iCurWalkStep
+int iCurRunStep
+int iBlockSpeedUpdate
+
+; CONSTANTS
+string_var sIniFileName = "variable_movement.ini"
+string_var sEnhancedMovementIni = "EnhancedMovement.ini"
+int iControlCodePOV = 13
+int iScrollUpKey = 264
+int iScrollDownKey = 265
+
+; MOD SETTINGS
+int iIncreaseSpeedKey = GetINIFloatOrDefault_Cached "Settings:iIncreaseKey" sIniFileName iScrollUpKey
+int iDecreaseSpeedKey = GetINIFloatOrDefault_Cached "Settings:iDecreaseKey" sIniFileName iScrollDownKey
+int iSprintKey = GetINIFloatOrDefault_Cached "Settings:iSprintKey" sIniFileName 0
+int iWalkSteps = GetINIFloatOrDefault_Cached "Settings:iWalkSteps" sIniFileName 3
+int iRunSteps = GetINIFloatOrDefault_Cached "Settings:iRunSteps" sIniFileName 3
+int iVanillaWalkStep = GetINIFloatOrDefault_Cached "Settings:iVanillaWalkStep" sIniFileName (-1)
+int iVanillaRunStep = GetINIFloatOrDefault_Cached "Settings:iVanillaRunStep" sIniFileName (-1)
+int bUseDeadzone = GetINIFloatOrDefault_Cached "Settings:bUseDeadzone" sIniFileName 0
+int iModifierKey = GetINIFloatOrDefault_Cached "Settings:iModifierKey" sIniFileName 0
+int bNoAdjustWhenScoped = GetINIFloatOrDefault_Cached "Settings:bNoAdjustWhenScoped" sIniFileName 0
+
+; Overwrite game INI settings if defined
+float fVMSMinAnalogWalkSpeed = GetINIFloatOrDefault_Cached "Settings:fMinAnalogWalkSpeed" sIniFileName 0.0
+float fVMSMaxAnalogWalkSpeed = GetINIFloatOrDefault_Cached "Settings:fMaxAnalogWalkSpeed" sIniFileName 0.0
+float fVMSMinAnalogRunSpeed = GetINIFloatOrDefault_Cached "Settings:fMinAnalogRunSpeed" sIniFileName 0.0
+float fVMSMaxAnalogRunSpeed = GetINIFloatOrDefault_Cached "Settings:fMaxAnalogRunSpeed" sIniFileName 0.0
+
+; MOD COMPATIBILITY SETTINGS
+int bStewiePOV = GetINIFloatOrDefault_Cached "Tweaks:bOnlyChangeCameraHeightIfPOVKeyHeld" "../NVSE/Plugins/nvse_stewie_tweaks.ini" 0
+int bEnhancedMovementSprint = GetINIFloatOrDefault_Cached "Sprint_Main:bEnableSprint" sEnhancedMovementIni 0
+
+; GAME SETTINGS
+if fVMSMinAnalogWalkSpeed > 0.0
+    float fMinAnalogWalkSpeed = fVMSMinAnalogWalkSpeed
+else
+    float fMinAnalogWalkSpeed = GetNumericINISetting "fMinAnalogWalkSpeed:Controls"
+endif
+
+if fVMSMaxAnalogWalkSpeed > 0.0
+    float fMaxAnalogWalkSpeed = fVMSMaxAnalogWalkSpeed
+else
+    float fMaxAnalogWalkSpeed = GetNumericINISetting "fMaxAnalogWalkSpeed:Controls"
+endif
+
+if fVMSMinAnalogRunSpeed > 0.0
+    float fMinAnalogRunSpeed = fVMSMinAnalogRunSpeed
+else
+    float fMinAnalogRunSpeed = GetNumericINISetting "fMinAnalogRunSpeed:Controls"
+endif
+
+if fVMSMaxAnalogRunSpeed > 0.0
+    float fMaxAnalogRunSpeed = fVMSMaxAnalogRunSpeed
+else
+    float fMaxAnalogRunSpeed = GetNumericINISetting "fMaxAnalogRunSpeed:Controls"
+endif
+
+if bUseDeadzone
+    float fDeadzone = 7849.0/32767.0
+    fMinAnalogWalkSpeed = ((fDeadzone - 0.0) / (0.8 - 0.0) * (fMaxAnalogWalkSpeed - fMinAnalogWalkSpeed) + fMinAnalogWalkSpeed)
+endif
+
+; Detect if EnhancedMovement sprint is enabled and use configured key
+if bEnhancedMovementSprint
+    iSprintKey = GetINIFloatOrDefault_Cached "Sprint_Main:iSprintKey" sEnhancedMovementIni iSprintKey
+endif 
+
+iWalkSteps = GetMaxOf 0 (iWalkSteps - 1)
+iRunSteps = GetMaxOf 0 (iRunSteps - 1)
+
+if iWalkSteps
+    float fWalkStepMult = (fMaxAnalogWalkSpeed - fMinAnalogWalkSpeed) / iWalkSteps
+else
+    float fWalkStepMult = 0
+endif
+
+if iRunSteps
+    float fRunStepMult = (fMaxAnalogRunSpeed - fMinAnalogRunSpeed) / iRunSteps
+else
+    float fRunStepMult = 0
+endif
+
+iCurWalkStep = Player.AuxiliaryVariableGetFloat "VMSCurWalkStep"
+iCurRunStep = Player.AuxiliaryVariableGetFloat "VMSCurRunStep"
+
+; Handles applying saved mult on game load and updating steps mid game
+if iCurWalkStep > iWalkSteps
+    iCurWalkStep = iWalkSteps
+endif
+
+if iCurRunStep > iRunSteps
+    iCurRunStep = iRunSteps
+endif
+
+ref rVMSShouldUpdate = CompileScript "VMSShouldUpdate.txt"
+
+ref rVMSRunSpeedHandler = (begin function {int iCurStep}
+    float fCurMul
+
+    fCurMul = fMinAnalogRunSpeed + fRunStepMult * iCurStep
+
+    if iCurStep == iVanillaRunStep
+        fCurMul = 1.0
+    endif
+
+    DispatchEventAlt "VMSRunSpeedMult" fCurMul
+    Player.AuxiliaryVariableSetFloat "VMSCurRunStep" iCurStep
+    Player.SetSpeedMult
+end)
+
+ref rVMSWalkSpeedHandler = (begin function {int iCurStep} 
+    float fCurMul
+
+    fCurMul = fMinAnalogWalkSpeed + fWalkStepMult * iCurStep
+
+    if iCurStep == iVanillaWalkStep
+        fCurMul = 1.0
+    endif
+
+    DispatchEventAlt "VMSWalkSpeedMult" fCurMul
+    Player.AuxiliaryVariableSetFloat "VMSCurWalkStep" iCurStep
+    Player.SetSpeedMult
+end)
+
+ref rIncreaseCallback = (begin function {int KeyCode}
+    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped
+    if bShouldUpdate
+        if Player.IsRunning == 0
+            if iCurWalkStep < iWalkSteps
+                iCurWalkStep += 1
+                call rVMSWalkSpeedHandler iCurWalkStep
+            else
+                iCurRunStep = 0
+                call rVMSRunSpeedHandler iCurRunStep
+                SetAlwaysRun 1 1
+            endif
+        else
+            if iCurRunStep < iRunSteps
+                iCurRunStep += 1
+            endif
+            call rVMSRunSpeedHandler iCurRunStep
+        endif
+    endif
+end)
+
+ref rDecreaseCallback = (begin function {int KeyCode}
+    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped
+    if bShouldUpdate
+        if Player.IsRunning == 0
+            if iCurWalkStep > 0 
+                iCurWalkStep -= 1
+            endif
+            call rVMSWalkSpeedHandler iCurWalkStep
+        else
+            if iCurRunStep > 0
+                iCurRunStep -= 1
+                call rVMSRunSpeedHandler iCurRunStep
+            else
+                iCurWalkStep = iWalkSteps
+                call rVMSWalkSpeedHandler iCurWalkStep
+                SetAlwaysRun 0 1
+            endif
+        endif
+    endif
+end)
+
+ref rTogglePOVDownCallback = (begin function {int ControlCode}
+    iBlockSpeedUpdate += 1
+end)
+
+ref rTogglePOVUpCallback = (begin function {int ControlCode}
+    iBlockSpeedUpdate -= 1
+end)
+
+ref rB42O4Callback = (begin function {}
+    iBlockSpeedUpdate += 1
+end)
+
+ref rB42O5Callback = (begin function {}
+    iBlockSpeedUpdate -= 1
+end)
+
+ref rSprintDownCallback = (begin function {int KeyCode}
+    if MenuMode == 0
+        DispatchEventAlt "VMSRunSpeedMult" 1.0
+        Player.AuxiliaryVariableSetFloat "VMSCurRunStep" iRunSteps
+        iCurRunStep = iRunSteps
+    endif
+end)
+
+SetOnKeyDownEventHandler rIncreaseCallback 1 iIncreaseSpeedKey
+SetOnKeyDownEventHandler rDecreaseCallback 1 iDecreaseSpeedKey
+
+; Special handling if increase/decrease are set to scroll wheel
+; Disable default FOV/POV change, unless Stewies Tweaks bOnlyChangeCameraHeightIfPOVKeyHeld is enabled
+if (iIncreaseSpeedKey == iScrollDownKey || iIncreaseSpeedKey == iScrollUpKey) && (iDecreaseSpeedKey == iScrollDownKey || iDecreaseSpeedKey == iScrollUpKey)
+    if bStewiePOV == 0 
+        ToggleVanityWheel 0
+    else
+        ; When change POV key is pressed, prevent speed from changing for Stewies Tweaks support
+        SetOnControlDownEventHandler rTogglePOVDownCallback 1 iControlCodePOV
+        SetOnControlUpEventHandler rTogglePOVUpCallback 1 iControlCodePOV
+    endif
+endif
+
+; Detect B42 optics use
+if bNoAdjustWhenScoped
+    SetEventHandlerAlt "B42O4" rB42O4Callback
+    SetEventHandlerAlt "B42O5" rB42O5Callback
+endif
+
+if iSprintKey
+    ; When sprint key is pressed, set multiplier back to 1.0
+    SetOnKeyDownEventHandler rSprintDownCallback 1 iSprintKey
+endif
+
+call rVMSWalkSpeedHandler iCurWalkStep 
+call rVMSRunSpeedHandler iCurRunStep
+
+Player.SetSpeedMult

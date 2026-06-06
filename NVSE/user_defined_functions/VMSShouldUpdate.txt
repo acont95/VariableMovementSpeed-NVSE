@@ -1,0 +1,12 @@
+begin function {int iBlockSpeedUpdate, int iModifierKey, int bNoAdjustWhenScoped}      
+    float fJlmLoot = GetUIFloatAlt "HUDMainMenu/JLM/_JLMVisible"
+    int modifierKeyPressed = !iModifierKey || IsKeyPressed iModifierKey
+    int bBlockScope = bNoAdjustWhenScoped && GetPCUsingScope
+    int bQUIPOpen = player.AuxiliaryVariableGetFloat "*_QUOPN"
+    float fHotkeyMenuOpen = GetUIFloatAlt "HUDMainMenu/Hokeys/hotkey_selector/visible"
+    if iBlockSpeedUpdate == 0 && MenuMode == 0 && fJlmLoot <= 0 && bBlockScope == 0 && modifierKeyPressed && bQUIPOpen == 0 && fHotkeyMenuOpen <= 0
+        SetFunctionValue 1
+        return
+    endif
+    SetFunctionValue 0
+end
