@@ -1,20 +1,19 @@
 #include <cstdint>
+#include <atomic>
 #include "VariableWalkSpeed.hpp"
 #include "nvse/PluginAPI.h"
 #include "nvse/SafeWrite.h"
-#include "Bethesda/TESGlobal.hpp"
 #include "Bethesda/ActorValueOwner.hpp"
 #include "Bethesda/TESObjectWEAP.hpp"
+#include "Bethesda/TESObjectARMO.hpp"
 
-constexpr char CONFIG_SECTION[] = "VariableWalkSpeed";
-constexpr char GLOBAL_VAR_FORM[] = "VMSWalkSpeedMult";
-
-CallDetour GetWalkSpeedDetour{};
 CallDetour GetActorWalkSpeedDetour{};
+CallDetour GetActorRunSpeedDetour{};
 
-constexpr std::uint32_t TESForm_GetFormByEditorID_Address = 0x00483A00;
+static std::atomic<float> fWalkSpeedMult = 1.0f;
+static std::atomic<float> fRunSpeedMult = 1.0f;
 
-float __cdecl Hook_GetActorWalkSpeed(ActorValueOwner* apOwner, TESObjectWEAP* pWeap, TESObjectARMO* pArmor, bool abSneaking, bool abNoWeapon, bool abIsNpc, bool abOverEncumbered) {
+float __cdecl Hook_GetActorWalkSpeed(CommonLib::ActorValueOwner* apOwner, CommonLib::TESObjectWEAP* pWeap, CommonLib::TESObjectARMO* pArmor, bool abSneaking, bool abNoWeapon, bool abIsNpc, bool abOverEncumbered) {
 	float fWalkSpeed = CdeclCall<float>(
 		GetActorWalkSpeedDetour.GetOverwrittenAddr(), 
 		apOwner,
@@ -25,16 +24,42 @@ float __cdecl Hook_GetActorWalkSpeed(ActorValueOwner* apOwner, TESObjectWEAP* pW
 		abIsNpc,
 		abOverEncumbered
 	);
-	CommonLib::TESForm* pForm = CdeclCall<CommonLib::TESForm*>(TESForm_GetFormByEditorID_Address, GLOBAL_VAR_FORM);
-	if (pForm && pForm->cFormType == CommonLib::ENUM_FORM_ID::GLOB_ID) {
-		CommonLib::TESGlobal* pGlobal = static_cast<CommonLib::TESGlobal*>(pForm);
-		return fWalkSpeed * pGlobal->fValue;
-	}
 
-	return fWalkSpeed;
+	return fWalkSpeed * fWalkSpeedMult;
+}
+
+
+float __cdecl Hook_GetActorRunSpeed(CommonLib::ActorValueOwner* apOwner, CommonLib::TESObjectWEAP* pWeap, CommonLib::TESObjectARMO* pArmor, bool abSneaking, bool abNoWeapon, bool abIsNpc, bool abOverEncumbered) {
+	float fRunSpeed = CdeclCall<float>(
+		GetActorRunSpeedDetour.GetOverwrittenAddr(),
+		apOwner,
+		pWeap,
+		pArmor,
+		abSneaking,
+		abNoWeapon,
+		abIsNpc,
+		abOverEncumbered
+	);
+
+	return fRunSpeed * fRunSpeedMult;
+}
+
+void OnWalkSpeedEventHandler(CommonLib::TESObjectREFR* thisObj, void* parameters) {
+	uintptr_t* args = static_cast<uintptr_t*>(parameters);
+	float fArg = std::bit_cast<float>(args[0]);
+
+	fWalkSpeedMult = fArg;
+}
+
+void OnRunSpeedEventHandler(CommonLib::TESObjectREFR* thisObj, void* parameters) {
+	uintptr_t* args = static_cast<uintptr_t*>(parameters);
+	float fArg = std::bit_cast<float>(args[0]);
+
+	fRunSpeedMult = fArg;
 }
 
 
 void installVariableWalkSpeedHooks() {
 	GetActorWalkSpeedDetour.WriteRelCall(0x00885B88, reinterpret_cast<std::uint32_t>(&Hook_GetActorWalkSpeed));
+	GetActorRunSpeedDetour.WriteRelCall(0x00885D24, reinterpret_cast<std::uint32_t>(&Hook_GetActorRunSpeed));
 }
