@@ -28,3 +28,4 @@ Compress-Archive -Path $distDir/* -DestinationPath (Join-Path $distDir "$TargetN
 
 # Clear temp folder
 Remove-Item -Path $nvseDir -Force -Recurse
+Remove-Item -Path $configDir -Force -Recurse
