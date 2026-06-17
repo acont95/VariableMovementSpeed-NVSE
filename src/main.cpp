@@ -17,7 +17,7 @@ NVSEEventManagerInterface* g_eventInterface{};
 
 static NVSEEventManagerInterface::ParamType s_MyEventParams[] = { NVSEEventManagerInterface::ParamType::eParamType_Float };
 
-constexpr char g_PluginVersion[] = "1.0.0";
+constexpr char g_PluginVersion[] = "2.0.1";
 constexpr char g_WalkSpeedMultEvent[] = "VMSWalkSpeedMult";
 constexpr char g_RunSpeedMultEvent[] = "VMSRunSpeedMult";
 
@@ -58,7 +58,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
 
 	info->infoVersion = PluginInfo::kInfoVersion;
-	info->name = "ThatPluginNVSE";
+	info->name = "VariableMovementSpeedNVSE";
 	info->version = 100;
 
 	// version checks

@@ -178,7 +178,9 @@ ref rB42O4Callback = (begin function {}
 end)
 
 ref rB42O5Callback = (begin function {}
-    iBlockSpeedUpdate -= 1
+    if iBlockSpeedUpdate > 0
+        iBlockSpeedUpdate -= 1
+    endif
 end)
 
 ref rSprintDownCallback = (begin function {int KeyCode}
