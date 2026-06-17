@@ -3,6 +3,7 @@
 #include "VariableWalkSpeed.hpp"
 #include "nvse/PluginAPI.h"
 #include "nvse/SafeWrite.h"
+#include "nvse/GameObjects.h"
 #include "Bethesda/ActorValueOwner.hpp"
 #include "Bethesda/TESObjectWEAP.hpp"
 #include "Bethesda/TESObjectARMO.hpp"
@@ -25,7 +26,10 @@ float __cdecl Hook_GetActorWalkSpeed(CommonLib::ActorValueOwner* apOwner, Common
 		abOverEncumbered
 	);
 
-	return fWalkSpeed * fWalkSpeedMult;
+	if (apOwner && DYNAMIC_CAST(apOwner, ActorValueOwner, PlayerCharacter)) {
+		return fWalkSpeed * fWalkSpeedMult;
+	}
+	return fWalkSpeed;
 }
 
 
@@ -40,8 +44,10 @@ float __cdecl Hook_GetActorRunSpeed(CommonLib::ActorValueOwner* apOwner, CommonL
 		abIsNpc,
 		abOverEncumbered
 	);
-
-	return fRunSpeed * fRunSpeedMult;
+	if (apOwner && DYNAMIC_CAST(apOwner, ActorValueOwner, PlayerCharacter)) {
+		return fRunSpeed * fRunSpeedMult;
+	}
+	return fRunSpeed;
 }
 
 void OnWalkSpeedEventHandler(CommonLib::TESObjectREFR* thisObj, void* parameters) {
