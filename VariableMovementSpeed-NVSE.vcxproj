@@ -99,7 +99,7 @@ powershell -NoProfile -ExecutionPolicy Unrestricted -File $(SolutionDir)package.
 )</Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>if $(ConfigurationName) == Release (powershell Remove-Item -Path $(SolutionDir)dist/* -Force -Recurse)</Command>
+      <Command>if $(ConfigurationName) == Release (powershell Remove-Item -Path $(SolutionDir)dist/* -Force -Recurse -Exclude '.gitkeep')</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
