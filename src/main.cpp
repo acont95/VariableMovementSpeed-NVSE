@@ -81,15 +81,15 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(NVSEInterface* nvse) {
 	// register to receive messages from NVSE
 	g_messagingInterface = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
 	g_messagingInterface->RegisterListener(g_pluginHandle, "NVSE", MessageHandler);
-	g_eventInterface = static_cast<NVSEEventManagerInterface*>(nvse->QueryInterface(kInterface_EventManager));
-
-	g_eventInterface->RegisterEvent(g_WalkSpeedMultEvent, 1, s_MyEventParams, NVSEEventManagerInterface::EventFlags::kFlag_AllowScriptDispatch);
-	g_eventInterface->RegisterEvent(g_RunSpeedMultEvent, 1, s_MyEventParams, NVSEEventManagerInterface::EventFlags::kFlag_AllowScriptDispatch);
-
-	g_eventInterface->SetNativeEventHandler(g_WalkSpeedMultEvent, reinterpret_cast<NVSEEventManagerInterface::NativeEventHandler>(OnWalkSpeedEventHandler));
-	g_eventInterface->SetNativeEventHandler(g_RunSpeedMultEvent, reinterpret_cast<NVSEEventManagerInterface::NativeEventHandler>(OnRunSpeedEventHandler));
 
 	if (!nvse->isEditor) {
+		g_eventInterface = static_cast<NVSEEventManagerInterface*>(nvse->QueryInterface(kInterface_EventManager));
+
+		g_eventInterface->RegisterEvent(g_WalkSpeedMultEvent, 1, s_MyEventParams, NVSEEventManagerInterface::EventFlags::kFlag_AllowScriptDispatch);
+		g_eventInterface->RegisterEvent(g_RunSpeedMultEvent, 1, s_MyEventParams, NVSEEventManagerInterface::EventFlags::kFlag_AllowScriptDispatch);
+
+		g_eventInterface->SetNativeEventHandler(g_WalkSpeedMultEvent, reinterpret_cast<NVSEEventManagerInterface::NativeEventHandler>(OnWalkSpeedEventHandler));
+		g_eventInterface->SetNativeEventHandler(g_RunSpeedMultEvent, reinterpret_cast<NVSEEventManagerInterface::NativeEventHandler>(OnRunSpeedEventHandler));
 		installVariableWalkSpeedHooks();
 	}
 
