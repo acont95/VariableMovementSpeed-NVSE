@@ -30,32 +30,36 @@ float fVMSMinAnalogRunSpeed = GetINIFloatOrDefault_Cached "Settings:fMinAnalogRu
 float fVMSMaxAnalogRunSpeed = GetINIFloatOrDefault_Cached "Settings:fMaxAnalogRunSpeed" sIniFileName 0.0
 
 ; MOD COMPATIBILITY SETTINGS
-int bStewiePOV = GetINIFloatOrDefault_Cached "Tweaks:bOnlyChangeCameraHeightIfPOVKeyHeld" "../NVSE/Plugins/nvse_stewie_tweaks.ini" 0
 int bEnhancedMovementSprint = GetINIFloatOrDefault_Cached "Sprint_Main:bEnableSprint" sEnhancedMovementIni 0
 
 ; GAME SETTINGS
+float fMinAnalogWalkSpeed
+float fMaxAnalogWalkSpeed
+float fMinAnalogRunSpeed
+float fMaxAnalogRunSpeed
+
 if fVMSMinAnalogWalkSpeed > 0.0
-    float fMinAnalogWalkSpeed = fVMSMinAnalogWalkSpeed
+    fMinAnalogWalkSpeed = fVMSMinAnalogWalkSpeed
 else
-    float fMinAnalogWalkSpeed = GetNumericINISetting "fMinAnalogWalkSpeed:Controls"
+    fMinAnalogWalkSpeed = GetNumericINISetting "fMinAnalogWalkSpeed:Controls"
 endif
 
 if fVMSMaxAnalogWalkSpeed > 0.0
-    float fMaxAnalogWalkSpeed = fVMSMaxAnalogWalkSpeed
+    fMaxAnalogWalkSpeed = fVMSMaxAnalogWalkSpeed
 else
-    float fMaxAnalogWalkSpeed = GetNumericINISetting "fMaxAnalogWalkSpeed:Controls"
+    fMaxAnalogWalkSpeed = GetNumericINISetting "fMaxAnalogWalkSpeed:Controls"
 endif
 
 if fVMSMinAnalogRunSpeed > 0.0
-    float fMinAnalogRunSpeed = fVMSMinAnalogRunSpeed
+    fMinAnalogRunSpeed = fVMSMinAnalogRunSpeed
 else
-    float fMinAnalogRunSpeed = GetNumericINISetting "fMinAnalogRunSpeed:Controls"
+    fMinAnalogRunSpeed = GetNumericINISetting "fMinAnalogRunSpeed:Controls"
 endif
 
 if fVMSMaxAnalogRunSpeed > 0.0
-    float fMaxAnalogRunSpeed = fVMSMaxAnalogRunSpeed
+    fMaxAnalogRunSpeed = fVMSMaxAnalogRunSpeed
 else
-    float fMaxAnalogRunSpeed = GetNumericINISetting "fMaxAnalogRunSpeed:Controls"
+    fMaxAnalogRunSpeed = GetNumericINISetting "fMaxAnalogRunSpeed:Controls"
 endif
 
 if bUseDeadzone
@@ -206,8 +210,15 @@ SetOnKeyDownEventHandler rDecreaseCallback 1 iDecreaseSpeedKey
 
 ; Special handling if increase/decrease are set to scroll wheel
 ; Disable default FOV/POV change, unless Stewies Tweaks bOnlyChangeCameraHeightIfPOVKeyHeld is enabled
+
+int bStewiePOVEnabled = 0
+if IsDLLLoaded "nvse_stewie_tweaks"
+    ref rVMSStewiePOVEnabled = CompileScript "VMSStewiePOVEnabled.txt"
+    bStewiePOVEnabled = call rVMSStewiePOVEnabled
+endif
+
 if (iIncreaseSpeedKey == iScrollDownKey || iIncreaseSpeedKey == iScrollUpKey) && (iDecreaseSpeedKey == iScrollDownKey || iDecreaseSpeedKey == iScrollUpKey)
-    if bStewiePOV == 0 
+    if bStewiePOVEnabled == 0 
         ToggleVanityWheel 0
     else
         ; When change POV key is pressed, prevent speed from changing for Stewies Tweaks support

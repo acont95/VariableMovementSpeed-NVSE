@@ -1,0 +1,9 @@
+begin function {}      
+
+    if StewieGetValue "bOnlyChangeCameraHeightIfPOVKeyHeld:Tweaks"
+        SetFunctionValue 1
+        return
+    endif
+
+    SetFunctionValue 0
+end
