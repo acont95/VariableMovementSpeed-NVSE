@@ -1,9 +1,9 @@
 begin function {int iBlockSpeedUpdate, int iModifierKey, int bNoAdjustWhenScoped, int bOnlyAdjustWhenMoving}      
 
-    array_var aUiTraitsActiveExclude = ReadFromJSON "Data/config/variable_movement.json" "/uiTraitsActiveExclude" 1 1
+    array_var aUiTraitsDisableSpeedAdjustment = ReadFromJSON "Data/config/variable_movement.json" "/uiTraitsDisableSpeedAdjustment" 1 1
     int bAnyExcludedUiTraitsActive = 0
 
-    foreach array_var Entry <- aUiTraitsActiveExclude
+    foreach array_var Entry <- aUiTraitsDisableSpeedAdjustment
         float fActive = GetUIFloatAlt (Entry["value"])
         if fActive > 0.0
             bAnyExcludedUiTraitsActive = 1

@@ -1,5 +1,5 @@
 {
-    "uiTraitsActiveExclude" : [
+    "uiTraitsDisableSpeedAdjustment" : [
         // JIP Companions Command and Control
         "HUDMainMenu/JIPCCCHUDDisplay/CommandsBar/visible",
         // Hotkey Scroll Wheel

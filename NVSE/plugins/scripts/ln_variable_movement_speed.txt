@@ -20,7 +20,7 @@ int iVanillaRunStep = GetINIFloatOrDefault_Cached "Settings:iVanillaRunStep" sIn
 int bUseDeadzone = GetINIFloatOrDefault_Cached "Settings:bUseDeadzone" sIniFileName 0
 int iModifierKey = GetINIFloatOrDefault_Cached "Settings:iModifierKey" sIniFileName 0
 int bNoAdjustWhenScoped = GetINIFloatOrDefault_Cached "Settings:bNoAdjustWhenScoped" sIniFileName 0
-int bRunMaxAfterSprint = GetINIFloatOrDefault_Cached "Settings:bRunMaxAfterSprint" sIniFileName 1
+int bRunMaxAfterSprint = GetINIFloatOrDefault_Cached "Settings:bRunMaxAfterSprint" sIniFileName 0
 int bOnlyAdjustWhenMoving = GetINIFloatOrDefault_Cached "Settings:bOnlyAdjustWhenMoving" sIniFileName 0
 
 ; Overwrite game INI settings if defined
