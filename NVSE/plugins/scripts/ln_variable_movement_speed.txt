@@ -20,6 +20,7 @@ int iVanillaRunStep = GetINIFloatOrDefault_Cached "Settings:iVanillaRunStep" sIn
 int bUseDeadzone = GetINIFloatOrDefault_Cached "Settings:bUseDeadzone" sIniFileName 0
 int iModifierKey = GetINIFloatOrDefault_Cached "Settings:iModifierKey" sIniFileName 0
 int bNoAdjustWhenScoped = GetINIFloatOrDefault_Cached "Settings:bNoAdjustWhenScoped" sIniFileName 0
+int bRunMaxAfterSprint = GetINIFloatOrDefault_Cached "Settings:bRunMaxAfterSprint" sIniFileName 1
 
 ; Overwrite game INI settings if defined
 float fVMSMinAnalogWalkSpeed = GetINIFloatOrDefault_Cached "Settings:fMinAnalogWalkSpeed" sIniFileName 0.0
@@ -188,9 +189,15 @@ end)
 ref rSprintDownCallback = (begin function {int KeyCode}
     if MenuMode == 0
         DispatchEventAlt "VMSRunSpeedMult" 1.0
-        Player.AuxiliaryVariableSetFloat "VMSCurRunStep" iRunSteps
-        iCurRunStep = iRunSteps
+        if bRunMaxAfterSprint
+            Player.AuxiliaryVariableSetFloat "VMSCurRunStep" iRunSteps
+            iCurRunStep = iRunSteps
+        endif
     endif
+end)
+
+ref rSprintUpCallback = (begin function {int KeyCode}
+    call rVMSRunSpeedHandler iCurRunStep
 end)
 
 SetOnKeyDownEventHandler rIncreaseCallback 1 iIncreaseSpeedKey
@@ -217,6 +224,7 @@ endif
 if iSprintKey
     ; When sprint key is pressed, set multiplier back to 1.0
     SetOnKeyDownEventHandler rSprintDownCallback 1 iSprintKey
+    SetOnKeyUpEventHandler rSprintUpCallback 1 iSprintKey
 endif
 
 call rVMSWalkSpeedHandler iCurWalkStep 
