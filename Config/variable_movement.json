@@ -7,6 +7,8 @@
         // JLM - Just Loot Menu
         "HUDMainMenu/JLM/visible",
         // QUIP - Quick Use Inventory Panel
-        "HUDMainMenu/QUIPPanel/_quipActive"
+        "HUDMainMenu/QUIPPanel/_quipActive",
+        // Loot Menu for FNV
+        "HUDMainMenu/lootmenu/visible"
     ]
 }
