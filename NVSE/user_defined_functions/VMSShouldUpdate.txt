@@ -1,10 +1,21 @@
-begin function {int iBlockSpeedUpdate, int iModifierKey, int bNoAdjustWhenScoped}      
-    float fJlmLoot = GetUIFloatAlt "HUDMainMenu/JLM/_JLMVisible"
+begin function {int iBlockSpeedUpdate, int iModifierKey, int bNoAdjustWhenScoped, int bOnlyAdjustWhenMoving}      
+
+    array_var aUiTraitsActiveExclude = ReadFromJSON "Data/config/variable_movement.json" "/uiTraitsActiveExclude" 0 1
+    int bAnyExcludedUiTraitsActive = 0
+
+    foreach array_var Entry <- aUiTraitsActiveExclude
+        float fActive = GetUIFloatAlt (Entry["value"])
+        if fActive > 0.0
+            bAnyExcludedUiTraitsActive = 1
+            break
+        endif
+    loop
+
     int modifierKeyPressed = !iModifierKey || IsKeyPressed iModifierKey
+    int bIsMoving = !bOnlyAdjustWhenMoving || Player.IsMoving
     int bBlockScope = bNoAdjustWhenScoped && GetPCUsingScope
-    int bQUIPOpen = player.AuxiliaryVariableGetFloat "*_QUOPN"
-    float fHotkeyMenuOpen = GetUIFloatAlt "HUDMainMenu/Hokeys/hotkey_selector/visible"
-    if iBlockSpeedUpdate == 0 && MenuMode == 0 && fJlmLoot <= 0 && bBlockScope == 0 && modifierKeyPressed && bQUIPOpen == 0 && fHotkeyMenuOpen <= 0
+
+    if iBlockSpeedUpdate == 0 && MenuMode == 0 && bBlockScope == 0 && modifierKeyPressed && bIsMoving && bAnyExcludedUiTraitsActive == 0
         SetFunctionValue 1
         return
     endif

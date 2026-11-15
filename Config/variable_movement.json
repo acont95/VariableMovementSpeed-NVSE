@@ -1,0 +1,12 @@
+{
+    "uiTraitsActiveExclude" : [
+        // JIP Companions Command and Control
+        "HUDMainMenu/JIPCCCHUDDisplay/CommandsBar/visible",
+        // Hotkey Scroll Wheel
+        "HUDMainMenu/Hokeys/hotkey_selector/visible",
+        // JLM - Just Loot Menu
+        "HUDMainMenu/JLM/visible",
+        // QUIP - Quick Use Inventory Panel
+        "HUDMainMenu/QUIPPanel/_quipActive"
+    ]
+}

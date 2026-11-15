@@ -21,6 +21,7 @@ int bUseDeadzone = GetINIFloatOrDefault_Cached "Settings:bUseDeadzone" sIniFileN
 int iModifierKey = GetINIFloatOrDefault_Cached "Settings:iModifierKey" sIniFileName 0
 int bNoAdjustWhenScoped = GetINIFloatOrDefault_Cached "Settings:bNoAdjustWhenScoped" sIniFileName 0
 int bRunMaxAfterSprint = GetINIFloatOrDefault_Cached "Settings:bRunMaxAfterSprint" sIniFileName 1
+int bOnlyAdjustWhenMoving = GetINIFloatOrDefault_Cached "Settings:bOnlyAdjustWhenMoving" sIniFileName 0
 
 ; Overwrite game INI settings if defined
 float fVMSMinAnalogWalkSpeed = GetINIFloatOrDefault_Cached "Settings:fMinAnalogWalkSpeed" sIniFileName 0.0
@@ -125,7 +126,7 @@ ref rVMSWalkSpeedHandler = (begin function {int iCurStep}
 end)
 
 ref rIncreaseCallback = (begin function {int KeyCode}
-    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped
+    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped bOnlyAdjustWhenMoving
     if bShouldUpdate
         if Player.IsRunning == 0
             if iCurWalkStep < iWalkSteps
@@ -146,7 +147,7 @@ ref rIncreaseCallback = (begin function {int KeyCode}
 end)
 
 ref rDecreaseCallback = (begin function {int KeyCode}
-    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped
+    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped bOnlyAdjustWhenMoving
     if bShouldUpdate
         if Player.IsRunning == 0
             if iCurWalkStep > 0 
