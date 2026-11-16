@@ -1,4 +1,4 @@
-begin function {int iBlockSpeedUpdate, int iModifierKey, int bNoAdjustWhenScoped, int bOnlyAdjustWhenMoving}      
+begin function {int iBlockSpeedUpdate, int iModifierKey, int bNoAdjustWhenScoped, int bOnlyAdjustWhenMoving, int iSprintKey}      
 
     array_var aUiTraitsDisableSpeedAdjustment = ReadFromJSON "Data/config/variable_movement.json" "/uiTraitsDisableSpeedAdjustment" 1 1
     int bAnyExcludedUiTraitsActive = 0
@@ -15,8 +15,9 @@ begin function {int iBlockSpeedUpdate, int iModifierKey, int bNoAdjustWhenScoped
     int bIsMoving = !bOnlyAdjustWhenMoving || Player.IsMoving
     int bBlockScope = bNoAdjustWhenScoped && GetPCUsingScope
     int bMoveControlsDisabled = IsControlDisabled 0 || IsControlDisabled 1 || IsControlDisabled 2 || IsControlDisabled 3
+    int bIsSprinting = iSprintKey && IsKeyPressed iSprintKey 2
 
-    if iBlockSpeedUpdate == 0 && MenuMode == 0 && bBlockScope == 0 && modifierKeyPressed && bIsMoving && bAnyExcludedUiTraitsActive == 0 && bMoveControlsDisabled == 0
+    if iBlockSpeedUpdate == 0 && MenuMode == 0 && bBlockScope == 0 && modifierKeyPressed && bIsMoving && bAnyExcludedUiTraitsActive == 0 && bMoveControlsDisabled == 0 && bIsSprinting == 0
         SetFunctionValue 1
         return
     endif

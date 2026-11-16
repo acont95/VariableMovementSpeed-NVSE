@@ -130,7 +130,7 @@ ref rVMSWalkSpeedHandler = (begin function {int iCurStep}
 end)
 
 ref rIncreaseCallback = (begin function {int KeyCode}
-    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped bOnlyAdjustWhenMoving
+    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped bOnlyAdjustWhenMoving iSprintKey
     if bShouldUpdate
         if Player.IsRunning == 0
             if iCurWalkStep < iWalkSteps
@@ -151,7 +151,7 @@ ref rIncreaseCallback = (begin function {int KeyCode}
 end)
 
 ref rDecreaseCallback = (begin function {int KeyCode}
-    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped bOnlyAdjustWhenMoving
+    int bShouldUpdate = call rVMSShouldUpdate iBlockSpeedUpdate iModifierKey bNoAdjustWhenScoped bOnlyAdjustWhenMoving iSprintKey
     if bShouldUpdate
         if Player.IsRunning == 0
             if iCurWalkStep > 0 
